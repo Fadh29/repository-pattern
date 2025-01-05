@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Repositories\Contracts\PesertaRepositoryInterface;
 use App\Repositories\Contracts\JurusanRepositoryInterface;
-use App\Models\Peserta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,13 +23,13 @@ class PesertaController extends Controller
     public function index()
     {
         $peserta = $this->pesertaRepository->getAll();
-        return view('peserta.index', compact('peserta'));
+        return response()->json(['success' => true, 'data' => $peserta]);
     }
 
     public function create()
     {
         $jurusan = $this->jurusanRepository->getAll();
-        return view('peserta.create', compact('jurusan'));
+        return response()->json(['success' => true, 'data' => $jurusan]);
     }
 
     public function store(Request $request)
@@ -55,14 +54,19 @@ class PesertaController extends Controller
 
         $peserta->jurusan()->attach($request->id_jurusan);
 
-        return redirect()->route('peserta.index')->with('success', 'Peserta berhasil ditambahkan.');
+        return response()->json(['success' => true, 'message' => 'Peserta berhasil ditambahkan.']);
     }
 
     public function edit($id)
     {
         $peserta = $this->pesertaRepository->getById($id);
-        $jurusan = \App\Models\Jurusan::all();
-        return view('peserta.edit', compact('peserta', 'jurusan'));
+        $jurusan = $this->jurusanRepository->getAll();
+
+        if (!$peserta) {
+            return response()->json(['success' => false, 'message' => 'Peserta tidak ditemukan.'], 404);
+        }
+
+        return response()->json(['success' => true, 'data' => compact('peserta', 'jurusan')]);
     }
 
     public function update(Request $request, $id)
@@ -74,7 +78,12 @@ class PesertaController extends Controller
             'id_jurusan.*' => 'exists:jurusan,id_jurusan',
         ]);
 
-        $peserta = Peserta::findOrFail($id);
+        $peserta = $this->pesertaRepository->getById($id);
+
+        if (!$peserta) {
+            return response()->json(['success' => false, 'message' => 'Peserta tidak ditemukan.'], 404);
+        }
+
         $peserta->update([
             'nama_peserta' => $request->nama_peserta,
             'alamat_peserta' => $request->alamat_peserta,
@@ -82,7 +91,7 @@ class PesertaController extends Controller
 
         $peserta->jurusan()->sync($request->id_jurusan);
 
-        return redirect()->route('peserta.index')->with('success', 'Peserta berhasil diperbarui.');
+        return response()->json(['success' => true, 'message' => 'Peserta berhasil diperbarui.']);
     }
 
     public function destroy($id)
@@ -90,32 +99,34 @@ class PesertaController extends Controller
         $peserta = $this->pesertaRepository->getById($id);
 
         if (!$peserta) {
-            return redirect()->route('peserta.index')->with('error', 'Peserta tidak ditemukan.');
+            return response()->json(['success' => false, 'message' => 'Peserta tidak ditemukan.'], 404);
         }
 
         $peserta->jurusan()->detach();
         $this->pesertaRepository->delete($id);
 
-        return redirect()->route('peserta.index')->with('success', 'Peserta berhasil dihapus.');
-    }
-
-    public function loginForm()
-    {
-        return view('auth.login');
+        return response()->json(['success' => true, 'message' => 'Peserta berhasil dihapus.']);
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email_peserta', 'password');
+        $request->validate([
+            'email_peserta' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->route('home')->with('success', 'Berhasil login!');
+        $credentials = $request->only('email_peserta', 'password');
+        $token = $this->pesertaRepository->authenticate($credentials['email_peserta'], $credentials['password']);
+
+        if ($token) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Login berhasil.',
+                'token' => $token,
+            ]);
         }
 
-        return back()->withErrors([
-            'email_peserta' => 'Email atau password salah.',
-        ]);
+        return response()->json(['success' => false, 'message' => 'Email atau password salah.'], 401);
     }
 
     public function logout(Request $request)
@@ -124,6 +135,6 @@ class PesertaController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login')->with('success', 'Berhasil logout!');
+        return response()->json(['success' => true, 'message' => 'Berhasil logout.']);
     }
 }

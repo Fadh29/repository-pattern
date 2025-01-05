@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Peserta extends Authenticatable
 {
-    use Notifiable;
+    use HasFactory, HasApiTokens, Notifiable;
 
     protected $table = 'peserta';
     protected $primaryKey = 'id_peserta';

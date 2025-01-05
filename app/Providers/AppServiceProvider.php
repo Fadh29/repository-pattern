@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,7 +31,28 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+    // public function boot()
+    // {
+    //     $this->configureRateLimiting();
+
+    //     $this->routes(function () {
+    //         Route::prefix('api') // Menambahkan prefix 'api' di URL
+    //             ->middleware('api') // Middleware untuk API
+    //             ->namespace($this->namespace) // Menentukan namespace untuk controller
+    //             ->group(base_path('routes/api.php')); // Menentukan file rute untuk API
+
+    //         Route::middleware('web') // Middleware untuk web routes
+    //             ->namespace($this->namespace) // Menentukan namespace untuk controller
+    //             ->group(base_path('routes/web.php')); // Menentukan file rute untuk Web
+    //     });
+    // }
+
+    /**
+     * Configure the rate limiters for the application.
+     *
+     * @return void
+     */
+    protected function configureRateLimiting()
     {
         //
     }

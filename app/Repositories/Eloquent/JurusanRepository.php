@@ -11,4 +11,14 @@ class JurusanRepository extends BaseRepository implements JurusanRepositoryInter
     {
         $this->model = $jurusan;
     }
+
+    public function update($id, array $data)
+    {
+        $jurusan = $this->model->find($id);
+        if ($jurusan) {
+            $jurusan->update($data);
+            return $jurusan;
+        }
+        return null;
+    }
 }

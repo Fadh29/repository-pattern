@@ -14,22 +14,33 @@ class JurusanController extends Controller
         $this->jurusanRepository = $jurusanRepository;
     }
 
+    // API: Get all jurusan
     public function index()
     {
         $jurusan = $this->jurusanRepository->getAll();
-        return view('jurusan.index', compact('jurusan'));
+        return response()->json([
+            'success' => true,
+            'data' => $jurusan
+        ]);
     }
 
+    // API: Create a new jurusan
     public function store(Request $request)
     {
         $data = $request->validate([
             'nama_jurusan' => 'required|string|max:255',
         ]);
 
-        $this->jurusanRepository->create($data);
-        return redirect()->back()->with('success', 'Jurusan berhasil ditambahkan!');
+        $jurusan = $this->jurusanRepository->create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jurusan berhasil ditambahkan!',
+            'data' => $jurusan
+        ], 201);  // Status 201 Created
     }
 
+    // API: Update an existing jurusan
     public function update(Request $request, $id)
     {
         $data = $request->validate([
@@ -38,21 +49,37 @@ class JurusanController extends Controller
 
         $result = $this->jurusanRepository->update($id, $data);
 
+        // Cek apakah update berhasil
         if ($result) {
-            return redirect()->back()->with('success', 'Jurusan berhasil diperbarui!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Jurusan berhasil diperbarui!',
+                'data' => $result
+            ]);
         }
 
-        return redirect()->back()->with('error', 'Jurusan tidak ditemukan!');
+        return response()->json([
+            'success' => false,
+            'message' => 'Jurusan tidak ditemukan!'
+        ], 404);
     }
 
+
+    // API: Delete a jurusan
     public function destroy($id)
     {
         $result = $this->jurusanRepository->delete($id);
 
         if ($result) {
-            return redirect()->back()->with('success', 'Jurusan berhasil dihapus!');
+            return response()->json([
+                'success' => true,
+                'message' => 'Jurusan berhasil dihapus!'
+            ]);
         }
 
-        return redirect()->back()->with('error', 'Jurusan tidak ditemukan!');
+        return response()->json([
+            'success' => false,
+            'message' => 'Jurusan tidak ditemukan!'
+        ], 404);  // Status 404 Not Found
     }
 }

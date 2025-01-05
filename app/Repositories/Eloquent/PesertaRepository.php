@@ -71,7 +71,7 @@ class PesertaRepository implements PesertaRepositoryInterface
         $peserta = Peserta::where('email_peserta', $email)->first();
 
         if ($peserta && Hash::check($password, $peserta->password)) {
-            return $peserta;
+            return $peserta->createToken('tokennya')->plainTextToken;
         }
 
         return null;

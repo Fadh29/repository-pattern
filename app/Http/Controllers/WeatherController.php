@@ -24,19 +24,19 @@ class WeatherController extends Controller
 
             if ($response->successful()) {
                 $weatherData = $response->json();
-                return view('weather', [
+                return response()->json([
                     'city' => $city,
                     'weatherData' => $weatherData,
                 ]);
             } else {
-                return view('weather', [
+                return response()->json([
                     'error' => 'Kota tidak ditemukan atau API bermasalah.',
-                ]);
+                ], 400);
             }
         } catch (\Exception $e) {
-            return view('weather', [
+            return response()->json([
                 'error' => 'Terjadi kesalahan saat menghubungi API.',
-            ]);
+            ], 500);
         }
     }
 }
