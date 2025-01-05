@@ -1,0 +1,50 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h2>Ramalan Cuaca</h2>
+    <form id="weatherForm" method="POST" action="{{ route('weather.search') }}">
+        @csrf
+        <div class="mb-3">
+            <label for="city" class="form-label">Nama Kota</label>
+            <input type="text" id="city" name="city" class="form-control" placeholder="Masukkan nama kota" required>
+        </div>
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Tanggal Mulai</label>
+            <input type="text" id="start_date" name="start_date" class="form-control" placeholder="Pilih tanggal mulai" required>
+        </div>
+        <div class="mb-3">
+            <label for="end_date" class="form-label">Tanggal Selesai</label>
+            <input type="text" id="end_date" name="end_date" class="form-control" placeholder="Pilih tanggal selesai" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Cari</button>
+    </form>
+
+    @if (session('error'))
+    <div class="alert alert-danger mt-3">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if (isset($forecast))
+    <h3 class="mt-4">Ramalan Cuaca untuk {{ $city }}</h3>
+    @foreach ($forecast as $day)
+    <div>
+        <strong>{{ $day['date'] }}:</strong> {{ $day['weather'] }} ({{ $day['temperature'] }}°C)
+    </div>
+    @endforeach
+    @endif
+</div>
+@endsection
+
+@section('scripts')
+<script>
+    // Menggunakan Litepicker untuk input tanggal
+    new Litepicker({
+        element: document.getElementById('start_date'),
+        singleMode: false,
+        elementEnd: document.getElementById('end_date'),
+        format: 'YYYY-MM-DD'
+    });
+</script>
+@endsection
